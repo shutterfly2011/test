@@ -4,8 +4,8 @@
     <script src="Scripts/echarts.min.js"></script>
     <script src="Scripts/jquery-1.10.2.js"></script>
     <asp:Label ID="Label1" runat="server" Text="This is eChar3"></asp:Label>
-    <input id="Button1" type="button" value="click to load data to chart" onClick="reloadData()"/>
-    <div id="chart1" style="width:100%; height:600px"></div>
+    <input id="Button1" type="button" value="click to load data to chart" onClick="reloadData()"/>&nbsp;<div id="chart1" style="width:100%; height:600px"></div>
+    <asp:Label ID="Label2" runat="server" Text="10 tries remain"></asp:Label>
     <script type="text/javascript">
         var myChart = echarts.init(document.getElementById("chart1"));
         var base = 10;
@@ -98,19 +98,20 @@
 
     </script>
     <script>
+        var nTry = 0;
         function onClick() {
             alert('hello world!');
         }
         function reloadData() {
-            
+            myChart.showLoading();
             //$.get("data\confidence-band.txt", function (ds) {
             $.ajax({
-                url: "confidence-band.json", dataType: "json", success: function (ds) {
-                    myChart.showLoading();
-                    alert('begin parse data');
+                url: "confidence-band1.json", dataType: "json", success: function (data) {
+                    
+                    //alert('begin parse data');
                     //var data = JSON.parse(ds);
                     //var data = JSON.parse(JSON.stringify(ds));
-                    alert('finish parse data');
+                    //alert('finish parse data');
                     base = -data.reduce(function (min, val) {
                         return Math.floor(Math.min(min, val.l));
                     }, Infinity);
@@ -142,8 +143,23 @@
                     myChart.setOption(option);
                     myChart.hideLoading();
                 }, error: function (jqXHR, textStatus, errorThrown) {
-                    alert("error occured!");
-                    console.log(textStatus, errorThrown);
+                    //alert("error occured!");
+
+                    nTry += 1;
+                    if (nTry <= 10) {
+                        setTimeout(reloadData, 5000);
+                        $(document).ready(function () {
+                            document.getElementById("<%=Label2.ClientID%>").innerHTML = nTry + ' tries remain';
+                        });
+                        
+                    }
+                    else {
+                        alert('after 10 tries error occured');
+                        console.log(textStatus, errorThrown);    
+                    }
+                    
+                     
+                    
                 }
             });
             
