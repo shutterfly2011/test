@@ -24,6 +24,30 @@
                     return params[2].name + '<br />' + params[2].value;
                 }
             },
+            dataZoom: {
+                type: 'slider',
+                start: 0,
+                end: 100,
+                xAxisIndex: 0
+            },
+            dataZoom:{
+                type: 'inside',
+                xAxisIndex: 0,
+                start: 0,
+                end: 100
+            },
+            dataZoom: {
+            type: 'slider',
+            start: 0,
+            end: 100,
+            yAxisIndex: 0
+            },
+            dataZoom:{
+                type: 'inside',
+                yAxisIndex: 0,
+                start: 0,
+                end: 100
+            },
             grid: {
                 left: '3%',
                 right: '4%',
@@ -77,7 +101,7 @@
                 },
                 areaStyle: {
                     normal: {
-                        color: '#ccc'
+                        color: 'Aqua'
                     }
                 },
                 stack: 'confidence-band',
@@ -89,11 +113,34 @@
                 symbolSize: 6,
                 itemStyle: {
                     normal: {
-                        color: '#c23531'
+                        color: 'Red'
                     }
                 },
                 showSymbol: false
-            }]
+            }, {
+                name:'L2',
+                type: 'line',
+                data: [],
+                lineStyle: {
+                    normal: {opacity:0}
+                },
+                stack: 'confidence-band',
+                symbol:'none'
+            }, {
+                name: 'U2',
+                type: 'line',
+                data: [],
+                lineStyle: { normal: { opacity: 0 } },
+                areaStyle: {
+                    normal: {
+                        color: 'Beige'
+                    }
+                },
+                stack: 'confidence-band',
+                symbol:'none'
+            }
+
+            ]
         });
 
     </script>
@@ -106,12 +153,14 @@
             myChart.showLoading();
             //$.get("data\confidence-band.txt", function (ds) {
             $.ajax({
-                url: "confidence-band1.json", dataType: "json", success: function (data) {
+                url: "Data/GBProfiles.json", dataType: "json", success: function (data0) {
                     
                     //alert('begin parse data');
                     //var data = JSON.parse(ds);
                     //var data = JSON.parse(JSON.stringify(ds));
                     //alert('finish parse data');
+                    var data = data0.Profiles[0].Batches[0].Data;
+                    var data1 = data0.Profiles[0].Batches[1].Data;
                     base = -data.reduce(function (min, val) {
                         return Math.floor(Math.min(min, val.l));
                     }, Infinity);
@@ -119,7 +168,7 @@
                     option = {
                         xAxis: {
                             data: data.map(function (item) {
-                                return item.date;
+                                return item.ts;
                             })
                         },
                         series: [
@@ -135,7 +184,17 @@
                             },
                             {
                                 data: data.map(function (item) {
-                                    return item.value + base;
+                                    return item.v + base;
+                                })
+                            },
+                            {
+                                data: data1.map(function(item){
+                                    return item.l + base;
+                                })
+                            },
+                            {
+                                data: data1.map(function (item) {
+                                    return item.u - item.l;
                                 })
                             }
                         ]
