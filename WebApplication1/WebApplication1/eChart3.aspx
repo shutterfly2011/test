@@ -8,9 +8,10 @@
     <asp:Label ID="Label2" runat="server" Text="10 tries remain"></asp:Label>
     <script type="text/javascript">
         var _data;
+        var option;
         var myChart = echarts.init(document.getElementById("chart1"));
         var base = 10;
-        myChart.setOption(option = {
+        option = {
             title: {
                 text: 'Confidence Band',
                 subtext: 'Example in MetricsGraphics.js',
@@ -22,6 +23,7 @@
                     animation: false
                 },
                 formatter: function (params) {
+                    console.log(params);
                     return params[2].name + '<br />' + params[2].value;
                 }
             },
@@ -35,19 +37,19 @@
                 end: 100,
                 xAxisIndex: 0
             },
-            dataZoom:{
+            dataZoom: {
                 type: 'inside',
                 xAxisIndex: 0,
                 start: 0,
                 end: 100
             },
             dataZoom: {
-            type: 'slider',
-            start: 0,
-            end: 100,
-            yAxisIndex: 0
+                type: 'slider',
+                start: 0,
+                end: 100,
+                yAxisIndex: 0
             },
-            dataZoom:{
+            dataZoom: {
                 type: 'inside',
                 yAxisIndex: 0,
                 start: 0,
@@ -124,14 +126,14 @@
                 },
                 showSymbol: false
             }, {
-                name:'L2',
+                name: 'L2',
                 type: 'line',
                 data: [],
                 lineStyle: {
-                    normal: {opacity:0}
+                    normal: { opacity: 0 }
                 },
                 stack: 'confidence-band',
-                symbol:'none'
+                symbol: 'none'
             }, {
                 name: 'U2',
                 type: 'line',
@@ -143,7 +145,7 @@
                     }
                 },
                 stack: 'confidence-band',
-                symbol:'none'
+                symbol: 'none'
             }, {
                 //name: 'val2',
                 type: 'line',
@@ -160,7 +162,8 @@
             }
 
             ]
-        });
+        };
+        myChart.setOption(option);
         myChart.on('mouseover', function (params) {
             console.log(params);
         });
@@ -186,7 +189,32 @@
                     base = -data.reduce(function (min, val) {
                         return Math.floor(Math.min(min, val.l));
                     }, Infinity);
-                    alert('base is ' + base);
+                    //alert('base is ' + base);
+                    option.legend.data = [_data.Profiles[0].Name + "#" + _data.Profiles[0].Batches[0].BatchId + ' Value', _data.Profiles[1].Name + "#" + _data.Profiles[1].Batches[0].BatchId + ' Value'];
+                    option.xAxis.data = $.map(data, function (item) {
+                        return item.ts;
+                        });
+                    option.series[0].data = $.map(data, function (item) {
+                        return item.l + base;
+                    });
+                    option.series[1].data = $.map(data, function (item) {
+                        return item.u - item.l;
+                    });
+                    option.series[2].name = _data.Profiles[0].Name + "#" + _data.Profiles[0].Batches[0].BatchId + ' Value';
+                    option.series[2].data = data.map(function (item) {
+                        return item.v + base;
+                    });
+                    option.series[3].data = data1.map(function(item){
+                        return item.l + base;
+                    });
+                    option.series[4].data = data1.map(function (item) {
+                        return item.u - item.l;
+                    });
+                    option.series[5].name = _data.Profiles[1].Name + "#" + _data.Profiles[1].Batches[0].BatchId + ' Value';
+                    option.series[5].data = data1.map(function (item) {
+                        return item.v + base;
+                    });
+                    /*
                     option = {
                         legend: {
                             data: [_data.Profiles[0].name + "-" + _data.Profiles[0].Batches[0].BatchId + ' Value']
@@ -201,21 +229,13 @@
                         },
                         series: [
                             {
-                                /*
-                                data: data.map(function (item) {
-                                    return item.l + base;
-                                })
-                                */
+
                                 data: $.map(data, function (item) {
                                     return item.l + base;
                                     })
                             },
                             {
-                                /*
-                                data: data.map(function (item) {
-                                    return item.u - item.l;
-                                })
-                                */
+
                                 data: $.map(data, function (item) {
                                     return item.u - item.l;
                                     })
@@ -245,7 +265,7 @@
                             }
                         ]
                     };
-                    
+                    */
                     myChart.setOption(option);
                     myChart.hideLoading();
                 }, error: function (jqXHR, textStatus, errorThrown) {
